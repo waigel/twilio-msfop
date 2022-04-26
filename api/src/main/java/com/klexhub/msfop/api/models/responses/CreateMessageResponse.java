@@ -1,4 +1,4 @@
-package com.klexhub.msfop.api.responses;
+package com.klexhub.msfop.api.models.responses;
 
 import lombok.*;
 

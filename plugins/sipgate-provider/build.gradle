@@ -1,3 +1,7 @@
+plugins{
+    id "io.freefair.lombok" version "5.3.0"
+}
+
 dependencies {
     // compileOnly important!!! We do not want to put the api into the zip file since the main program has it already!
     compileOnly project(':api')
@@ -8,5 +12,6 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     testImplementation group: 'junit', name: 'junit', version: '4.+'
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
-    implementation 'com.konghq:unirest-java:3.11.09'
+    implementation 'com.konghq:unirest-java:3.13.7'
+    implementation "com.twilio.sdk:twilio:8.29.1"
 }

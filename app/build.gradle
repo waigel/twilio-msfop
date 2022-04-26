@@ -25,6 +25,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     testImplementation group: 'junit', name: 'junit', version: '4.+'
+    implementation "com.twilio.sdk:twilio:8.29.1"
 }
 
 task uberjar(type: Jar, dependsOn: ['compileJava']) {

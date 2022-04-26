@@ -1,45 +1,51 @@
 package com.klexhub.msfop.controllers;
 
 import com.klexhub.msfop.api.SMSProvider;
-import com.klexhub.msfop.api.responses.CreateMessageResponse;
-import com.klexhub.msfop.models.CreateMessageRequest;
+import com.klexhub.msfop.api.models.responses.CreateMessageResponse;
+import com.klexhub.msfop.api.models.CreateMessageRequest;
 import com.klexhub.msfop.providers.plugin.ProviderPluginLoader;
 import com.klexhub.msfop.utils.BasicAuthHelper;
+import com.twilio.rest.api.v2010.account.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import javax.websocket.server.PathParam;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Optional;
 
 @Controller
 public class CreateMessageController {
 
-    @Autowired
-    private ProviderPluginLoader providerPluginLoader;
+    private final ProviderPluginLoader providerPluginLoader;
 
+    public CreateMessageController(ProviderPluginLoader providerPluginLoader) {
+        this.providerPluginLoader = providerPluginLoader;
+    }
 
     @PostMapping(
-        path = "/2010-04-01/Accounts/{account_sid}/Messages.json",
-        consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<CreateMessageResponse> createMessage(@PathParam("account_sid") final String accountSid,
-                                                               final CreateMessageRequest createMessageRequest,
-                                                               @RequestHeader("Authorization") final String authorizationHeader) {
-        final SMSProvider smsProvider =  providerPluginLoader.getSmsProvider();
-        final String[] auth = BasicAuthHelper.parse(authorizationHeader);
+            path = "/2010-04-01/Accounts/{account_sid}/Messages.json",
+            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseEntity<Message> createMessage(final CreateMessageRequest createMessageRequest,
+                                                               @RequestHeader("Authorization") final String authorizationHeader,
+                                                               @PathVariable("account_sid") final String accountSid) {
+        final SMSProvider smsProvider = providerPluginLoader.getSmsProvider();
+        final String[] basicAuth = BasicAuthHelper.parse(authorizationHeader);
 
-        final CreateMessageResponse createMessageResponse = smsProvider.sendSMS(
-            createMessageRequest.getFrom(),
-            createMessageRequest.getTo(),
-            createMessageRequest.getBody(),
-            auth.length > 0 ? auth[0] : accountSid,
-            authorizationHeader.length() > 1 ? auth[1] : null
+        final Optional<Message> messageResponse = smsProvider.sendSMS(
+                createMessageRequest,
+                accountSid,
+                basicAuth
         );
 
-        return new ResponseEntity<CreateMessageResponse>(createMessageResponse,
-            createMessageResponse.getError_code() == null ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+        return messageResponse.map(message -> new ResponseEntity<>(message, HttpStatus.OK)).orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+
     }
 }

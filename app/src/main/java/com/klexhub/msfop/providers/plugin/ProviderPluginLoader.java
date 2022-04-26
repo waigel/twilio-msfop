@@ -1,8 +1,6 @@
 package com.klexhub.msfop.providers.plugin;
 
-import com.klexhub.msfop.api.Greeting;
 import com.klexhub.msfop.api.SMSProvider;
-import com.klexhub.msfop.api.responses.CreateMessageResponse;
 import org.pf4j.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
